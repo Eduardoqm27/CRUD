@@ -1,14 +1,15 @@
+// routes/userRoutes.js
 const express = require('express');
-const userController = require('../controllers/userController');
 const router = express.Router();
+const userController = require('../controllers/userController');
 
-router.get('/', userController.getAllUsers);
-router.get('/search', userController.searchUsers); // Adicione esta rota
-router.get('/new', userController.renderCreateForm);
-router.post('/', userController.createUser);
-router.get('/:id', userController.getUserById);
-router.get('/:id/edit', userController.renderEditForm);
-router.put('/:id', userController.updateUser);
-router.delete('/:id', userController.deleteUser);
+// Rota para exibir o formulário de login
+router.get('/login', userController.loginForm);
+
+// Rota para processar o login do usuário
+router.post('/login', userController.login);
+
+// Rota para processar o logout do usuário
+router.post('/logout', userController.logout);
 
 module.exports = router;

@@ -23,8 +23,9 @@ CREATE TABLE produtos (
     categoria INT NOT NULL,
     FOREIGN KEY (categoria) REFERENCES categorias(id)
 );
+
 CREATE TABLE vendas (
-    id INT PRIMARY KEY,
+    id INT PRIMARY KEY AUTO_INCREMENT,
     id_user INT,
     id_produto INT,
     quantidade INT,
@@ -32,4 +33,12 @@ CREATE TABLE vendas (
     data_venda DATE,
     FOREIGN KEY (id_user) REFERENCES users(id),
     FOREIGN KEY (id_produto) REFERENCES produtos(id)
+);
+
+CREATE TABLE sessions (
+    id VARCHAR(255) NOT NULL PRIMARY KEY,
+    session_data TEXT NOT NULL,
+    expires DATETIME NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );

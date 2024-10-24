@@ -1,26 +1,17 @@
-const knex = require('knex');
+const { Sequelize } = require('sequelize');
 const dotenv = require('dotenv');
 
 dotenv.config();
 
-const db = knex({
-    client: 'mysql2', // O cliente que você está usando
-    connection: {
-        host: process.env.DB_HOST,
-        user: process.env.DB_USER,
-        password: process.env.DB_PASSWORD,
-        database: process.env.DB_NAME,
-    },
-    pool: { min: 0, max: 7 } // Configuração do pool de conexões
+const sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USER, process.env.DB_PASSWORD, {
+    host: process.env.DB_HOST,
+    dialect: 'mysql',
+    logging: false
 });
 
-// Testando a conexão
-db.raw('SELECT 1')
-    .then(() => {
-        console.log('Connected to the MySQL database.');
-    })
-    .catch(err => {
-        console.error('Error connecting to the database:', err);
-    });
+// Testando a conexão com o banco de dados
+sequelize.authenticate()
+    .then(() => console.log('Banco de dados conectado com sucesso.'))
+    .catch(err => console.error('Erro ao conectar ao banco de dados:', err));
 
-module.exports = db; // Exporta a instância do Knex
+module.exports = sequelize;

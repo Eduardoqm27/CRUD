@@ -1,65 +1,66 @@
 const express = require('express');
-const bodyParser = require('body-parser');
-const methodOverride = require('method-override');
-const expressLayouts = require('express-ejs-layouts');
 const session = require('express-session');
-const KnexSessionStore = require('connect-session-knex')(session); // Importando o armazenamento de sessão
-const indexRoutes = require('./routes/indexRoutes');
-const userRoutes = require('./routes/userRoutes');
-const produtoRoutes = require('./routes/produtoRoutes');
-const categoriaRoutes = require('./routes/categoriaRoutes');
-const vendaRoutes = require('./routes/vendaRoutes');
-const db = require('./config/db'); // Importando o Knex configurado
+const KnexSessionStore = require('connect-session-knex'); // Importa o KnexSessionStore
+const bodyParser = require('body-parser');
+const path = require('path');
+const db = require('./config/db');
+const authRoutes = require('./routes/authRoutes');
+const dotenv = require('dotenv');
+const Knex = require('knex'); // Importa o Knex
+
+dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Configuração do banco de dados para as sessões
-const store = new KnexSessionStore({
-    knex: db, // Usando a instância do Knex configurada
-    tablename: 'sessions', // Tabela onde as sessões serão armazenadas
+// Inicializa o Knex com a configuração do banco de dados
+const knex = Knex({
+    client: 'mysql2', // Define o cliente correto
+    connection: {
+        host: process.env.DB_HOST,
+        user: process.env.DB_USER,
+        password: process.env.DB_PASSWORD,
+        database: process.env.DB_NAME,
+    }
 });
 
-// Configuração da sessão
+// Cria a tabela de sessões se não existir
+const store = new (KnexSessionStore(session))({
+    knex: knex, // Passa a instância do Knex
+    tablename: 'sessions', // Nome da tabela onde as sessões serão armazenadas
+    createtable: true, // Cria a tabela se não existir
+    sidfieldname: 'id', // Nome do campo para o ID da sessão
+    clearInterval: 1000 * 60 * 60 // Limpa sessões a cada 1 hora
+});
+
+// Middleware de sessão
 app.use(session({
-    secret: 'segredo_super_secreto', // Mude isso para uma chave secreta segura
+    secret: 'segredo_super_secreto',
     resave: false,
     saveUninitialized: false,
-    store: store, // Utiliza o Knex como armazenamento da sessão
-    cookie: {
-        maxAge: 1000 * 60 * 60 // Sessão expira em 1 hora
+    store: store,
+    cookie: { 
+        maxAge: 1000 * 60 * 60 // 1 hora
     }
 }));
 
-// Configuração do motor de visualização
+// Configuração do EJS
 app.set('view engine', 'ejs');
-app.set('views', __dirname + '/views');
-app.use(expressLayouts);
+app.set('views', path.join(__dirname, 'views'));
 
-// Configuração de middlewares
-app.use(bodyParser.json());
+// Middlewares
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(methodOverride('_method'));
+app.use(bodyParser.json());
 
 // Rotas
-app.use('/', indexRoutes);
-app.use('/users', userRoutes);
-app.use('/produtos', produtoRoutes);
-app.use('/categorias', categoriaRoutes);
-app.use('/vendas', vendaRoutes);
+app.use('/', authRoutes);
 
-// Middleware para tratamento de 404
+// Tratamento de 404
 app.use((req, res) => {
     res.status(404).render('404');
 });
 
-// Middleware para tratamento de erros
-app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).send('Algo deu errado!');
-});
-
-// Início do servidor
+// Iniciar o servidor
 app.listen(PORT, () => {
     console.log(`Servidor rodando na porta ${PORT}`);
 });

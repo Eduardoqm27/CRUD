@@ -36,8 +36,8 @@ CREATE TABLE vendas (
 );
 
 CREATE TABLE sessions (
-    id VARCHAR(255) NOT NULL PRIMARY KEY,
-    session_data TEXT NOT NULL,
+    sid VARCHAR(255) NOT NULL PRIMARY KEY, -- Renomeado para 'sid'
+    session TEXT NOT NULL, -- Renomeado para 'session'
     expires DATETIME NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
